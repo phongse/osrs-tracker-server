@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  username    String     @unique
+  accountType String
+  firstImport DateTime   @default(now())
+  lastChange  DateTime   @default(now())
+  lastFetch   DateTime   @default(now())
+  combatLevel Int        @default(0)
+  hiscore     Hiscore
+  snapshots   Snapshot[]
+}
+
+model Snapshot {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  Player     Player   @relation(fields: [playerId], references: [id])
+  playerId   String   @db.ObjectId
+  importDate DateTime @default(now())
+  hiscore    Hiscore
+}
+
+type Hiscore {
+  skills Skills
+}
+
+type Skills {
+  overall      Skill
+  attack       Skill
+  defence      Skill
+  strength     Skill
+  hitpoints    Skill
+  ranged       Skill
+  prayer       Skill
+  magic        Skill
+  cooking      Skill
+  woodcutting  Skill
+  fletching    Skill
+  fishing      Skill
+  firemaking   Skill
+  crafting     Skill
+  smithing     Skill
+  mining       Skill
+  herblore     Skill
+  agility      Skill
+  thieving     Skill
+  slayer       Skill
+  farming      Skill
+  runecraft    Skill
+  hunter       Skill
+  construction Skill
+}
+
+type Skill {
+  rank  Int @default(0)
+  level Int @default(0)
+  xp    Int @default(0)
+  ehp   Int @default(0)
+}
+
+type Minigame {
+  rank  Int @default(0)
+  score Int @default(0)
+}
+
+type Boss {
+  rank  Int @default(0)
+  score Int @default(0)
+  ehb   Int @default(0)
+}
