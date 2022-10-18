@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { Player, PrismaClient } from "@prisma/client";
 import { Player as jsPlayer, Hiscores } from "oldschooljs";
+import { AccountType } from "oldschooljs/dist/meta/types";
 
 import { ONE_MINUTE_IN_MS } from "../../util/constants";
 import { getType } from "../../util/gamemode";
-import { AccountType } from "oldschooljs/dist/meta/types";
 
 const prisma = new PrismaClient();
 
@@ -16,12 +16,17 @@ const createNewUser = async (username: string, newHiscore: jsPlayer) => {
       data: {
         username: username,
         accountType,
+        combatLevel: newHiscore.combatLevel,
         hiscore: {
           skills: { ...newHiscore.skills },
+          bosses: { ...newHiscore.bossRecords },
         },
         snapshots: {
           create: {
-            hiscore: { skills: { ...newHiscore.skills } },
+            hiscore: {
+              skills: { ...newHiscore.skills },
+              bosses: { ...newHiscore.bossRecords },
+            },
           },
         },
       },
@@ -120,10 +125,14 @@ const updatePlayerByName = async (
         lastChange: currentDate,
         hiscore: {
           skills: { ...newHiscore.skills },
+          bosses: { ...newHiscore.bossRecords },
         },
         snapshots: {
           create: {
-            hiscore: { skills: { ...newHiscore.skills } },
+            hiscore: {
+              skills: { ...newHiscore.skills },
+              bosses: { ...newHiscore.bossRecords },
+            },
           },
         },
       },

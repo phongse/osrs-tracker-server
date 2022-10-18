@@ -29,6 +29,7 @@ model Snapshot {
 
 type Hiscore {
   skills Skills
+  bosses Bosses
 }
 
 type Skills {
@@ -56,6 +57,59 @@ type Skills {
   runecraft    Skill
   hunter       Skill
   construction Skill
+}
+
+type Bosses {
+  abyssalSire                  Boss
+  alchemicalHydra              Boss
+  barrowsChests                Boss
+  bryophyta                    Boss
+  callisto                     Boss
+  cerberus                     Boss
+  chambersofXeric              Boss
+  chambersofXericChallengeMode Boss
+  chaosElemental               Boss
+  chaosFanatic                 Boss
+  commanderZilyana             Boss
+  corporealBeast               Boss
+  crazyArchaeologist           Boss
+  dagannothPrime               Boss
+  dagannothRex                 Boss
+  dagannothSupreme             Boss
+  derangedArchaeologist        Boss
+  generalGraardor              Boss
+  giantMole                    Boss
+  grotesqueGuardians           Boss
+  hespori                      Boss
+  kalphiteQueen                Boss
+  kingBlackDragon              Boss
+  kraken                       Boss
+  kreeArra                     Boss
+  krilTsutsaroth               Boss
+  mimic                        Boss
+  nex                          Boss
+  nightmare                    Boss
+  obor                         Boss
+  phosanisNightmare            Boss
+  sarachnis                    Boss
+  scorpia                      Boss
+  skotizo                      Boss
+  tempoross                    Boss
+  theatreofBlood               Boss
+  theatreofBloodHard           Boss
+  theCorruptedGauntlet         Boss
+  theGauntlet                  Boss
+  thermonuclearSmokeDevil      Boss
+  tombsofAmascut               Boss
+  tombsofAmascutExpert         Boss
+  tzKalZuk                     Boss
+  tzTokJad                     Boss
+  venenatis                    Boss
+  vetion                       Boss
+  vorkath                      Boss
+  wintertodt                   Boss
+  zalcano                      Boss
+  zulrah                       Boss
 }
 
 type Skill {
