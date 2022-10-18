@@ -80,6 +80,18 @@ const addNewPlayerByName = async (username: string): Promise<Player> => {
   return newUser;
 };
 
+const newBossScore = (newHiscore: jsPlayer, user: Player) => {
+  let k: keyof typeof newHiscore.bossRecords;
+  for (k in newHiscore.bossRecords) {
+    if (user.hiscore.bosses[k].score !== newHiscore.bossRecords[k].score) {
+      return true;
+    }
+  }
+
+  // no new bosses killed
+  return false;
+};
+
 const updatePlayerByName = async (
   username: string,
   user: Player
@@ -114,8 +126,11 @@ const updatePlayerByName = async (
     return Promise.reject(err);
   }
 
-  // Player have gained xp since last fetch
-  if (newHiscore.skills.overall.xp > user.hiscore.skills.overall.xp) {
+  if (
+    newHiscore.skills.overall.xp > user.hiscore.skills.overall.xp ||
+    newBossScore(newHiscore, user)
+  ) {
+    // Player have gained xp or killed a boss since last fetch
     console.log("Player got xp");
     updatedUser = await prisma.player.update({
       where: {
