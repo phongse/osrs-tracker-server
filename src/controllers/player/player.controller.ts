@@ -1,51 +1,14 @@
 import { NextFunction, Request, Response } from "express";
-import { Player, PrismaClient } from "@prisma/client";
-import { Player as jsPlayer, Hiscores } from "oldschooljs";
+import { Hiscores } from "oldschooljs";
 import { AccountType } from "oldschooljs/dist/meta/types";
 
+import { prisma } from "../../index";
 import { ONE_MINUTE_IN_MS } from "../../util/constants";
-import { getType } from "../../util/gamemode";
-
-const prisma = new PrismaClient();
-
-const createNewUser = async (username: string, newHiscore: jsPlayer) => {
-  const accountType = await getType(username);
-
-  try {
-    const newUser = await prisma.player.create({
-      data: {
-        username: username,
-        accountType,
-        combatLevel: newHiscore.combatLevel,
-        hiscore: {
-          skills: { ...newHiscore.skills },
-          bosses: { ...newHiscore.bossRecords },
-        },
-        snapshots: {
-          create: {
-            hiscore: {
-              skills: { ...newHiscore.skills },
-              bosses: { ...newHiscore.bossRecords },
-            },
-          },
-        },
-      },
-      include: {
-        snapshots: {
-          select: {
-            id: false,
-            playerId: false,
-            importDate: true,
-            hiscore: true,
-          },
-        },
-      },
-    });
-    return newUser;
-  } catch (err) {
-    return Promise.reject(err);
-  }
-};
+import { addNewPlayerByName } from "./player-new.controller";
+import {
+  updateAccountTypeController,
+  updatePlayerByName,
+} from "./player-update.controller";
 
 const fetchHiscore = async (username: string, type: AccountType) => {
   try {
@@ -59,120 +22,7 @@ const fetchHiscore = async (username: string, type: AccountType) => {
   }
 };
 
-const addNewPlayerByName = async (username: string): Promise<Player> => {
-  let newUser;
-  let newHiscore;
-
-  const accountType = await getType(username);
-
-  try {
-    newHiscore = await fetchHiscore(username, accountType);
-  } catch (err) {
-    return Promise.reject(err);
-  }
-
-  try {
-    newUser = await createNewUser(username, newHiscore);
-  } catch (err) {
-    return Promise.reject(err);
-  }
-
-  return newUser;
-};
-
-const newBossScore = (newHiscore: jsPlayer, user: Player) => {
-  let k: keyof typeof newHiscore.bossRecords;
-  for (k in newHiscore.bossRecords) {
-    if (user.hiscore.bosses[k].score !== newHiscore.bossRecords[k].score) {
-      return true;
-    }
-  }
-
-  // no new bosses killed
-  return false;
-};
-
-const updatePlayerByName = async (
-  username: string,
-  user: Player
-): Promise<Player | undefined> => {
-  let currentDate = new Date();
-  let newHiscore;
-  let updatedUser;
-
-  const accountType = user.accountType as AccountType;
-
-  try {
-    newHiscore = await fetchHiscore(username, accountType);
-    updatedUser = await prisma.player.update({
-      where: {
-        username: username,
-      },
-      data: {
-        lastFetch: currentDate,
-      },
-      include: {
-        snapshots: {
-          select: {
-            id: false,
-            playerId: false,
-            importDate: true,
-            hiscore: true,
-          },
-        },
-      },
-    });
-  } catch (err) {
-    return Promise.reject(err);
-  }
-
-  if (
-    newHiscore.skills.overall.xp > user.hiscore.skills.overall.xp ||
-    newBossScore(newHiscore, user)
-  ) {
-    // Player have gained xp or killed a boss since last fetch
-    console.log("Player got xp");
-    updatedUser = await prisma.player.update({
-      where: {
-        username: username,
-      },
-      data: {
-        lastChange: currentDate,
-        hiscore: {
-          skills: { ...newHiscore.skills },
-          bosses: { ...newHiscore.bossRecords },
-        },
-        snapshots: {
-          create: {
-            hiscore: {
-              skills: { ...newHiscore.skills },
-              bosses: { ...newHiscore.bossRecords },
-            },
-          },
-        },
-      },
-      include: {
-        snapshots: {
-          select: {
-            id: false,
-            playerId: false,
-            importDate: true,
-            hiscore: true,
-          },
-        },
-      },
-    });
-    return updatedUser;
-  }
-
-  return updatedUser;
-};
-
-export const getPlayer = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const getPlayer = async (req: Request, res: Response, next: NextFunction) => {
   const username = req.params.username;
   let user;
 
@@ -227,26 +77,20 @@ export const getPlayer = async (
 };
 
 // does not include snapshots
-export const updateAccountType = async (
+const updateAccountType = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   let user;
   const username = req.params.username;
-  const accountType = (await getType(username)) as AccountType;
   try {
-    user = await prisma.player.update({
-      where: {
-        username: username,
-      },
-      data: {
-        accountType,
-      },
-    });
+    user = await updateAccountTypeController(username);
   } catch (err) {
     return next(err);
   }
 
   res.json({ user: user });
 };
+
+export { fetchHiscore, getPlayer, updateAccountType };

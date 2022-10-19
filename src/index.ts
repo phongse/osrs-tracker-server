@@ -1,5 +1,6 @@
 import * as dotenv from "dotenv";
 dotenv.config();
+import { PrismaClient } from "@prisma/client";
 import express from "express";
 import { exit } from "process";
 
@@ -9,6 +10,8 @@ if (!process.env.DATABASE_URL) {
   console.log("Define DATABASE_URL in .env");
   exit(1);
 }
+
+export const prisma = new PrismaClient();
 
 const app = express();
 
