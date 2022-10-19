@@ -2,6 +2,8 @@
 
 A REST API server, built with Express, Prisma, and Nodejs, for Oldschool Runescape trackers
 
+**NB: This currently uses the latest master branch of oldschooljs**
+
 ## Endpoints
 
 `/:username` - retrieves a player hiscore and their previous snapshots.
